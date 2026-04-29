@@ -11,7 +11,7 @@ export const baseOptions: BaseLayoutProps = {
   nav: {
     title: (
       <>
-        <img src="/brand/hackless-penguin.png" className="h-6 w-6" alt="Hackless" />
+        <img src="/brand/linuxpenguin.png" className="h-6 w-6" alt="Hackless" />
         Hackless Docs
       </>
     ),

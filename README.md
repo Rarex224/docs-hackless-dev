@@ -22,18 +22,3 @@ The public API specification is served from:
 
 - `/openapi/openapi.json`
 - `/openapi/openapi.yaml`
-
-## Railway
-
-Deploy this repository as a Next.js service and attach the custom domain:
-
-```txt
-docs.hackless.dev
-```
-
-Use:
-
-```bash
-npm run build
-npm run start
-```

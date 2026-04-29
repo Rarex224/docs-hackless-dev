@@ -1,4 +1,4 @@
 {
   "title": "Hackless",
-  "pages": ["index", "api", "sdk", "mcp", "deploy"]
+  "pages": ["index", "api", "sdk", "mcp"]
 }
