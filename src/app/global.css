@@ -129,3 +129,24 @@
 a {
   text-underline-offset: 4px;
 }
+
+#nd-toc [role="none"] {
+  display: none;
+}
+
+#nd-toc .border-s {
+  position: relative;
+}
+
+#nd-toc .border-s::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: -1px;
+  top: 0;
+  width: 1px;
+  height: var(--docs-read-progress, 0%);
+  border-radius: 999px;
+  background: var(--primary);
+  box-shadow: 0 0 16px color-mix(in oklab, var(--primary) 70%, transparent);
+  transition: height 150ms ease-out;
+}
