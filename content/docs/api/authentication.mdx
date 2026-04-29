@@ -1,0 +1,39 @@
+---
+title: Authentication
+description: How Hackless public API authentication works.
+---
+
+Hackless public routes can resolve two forms of authentication:
+
+## MCP/API key
+
+Use an MCP API key generated inside Hackless settings.
+
+```http
+Authorization: Bearer hk_your_api_key
+```
+
+or:
+
+```http
+X-API-Key: hk_your_api_key
+```
+
+API keys are hashed before storage. The platform stores the key prefix for display and lookup metadata, while requests are verified by hashing the presented secret.
+
+## Browser session
+
+When the API is called from the Hackless web app, the same request context can use the active NextAuth session cookie.
+
+## Which endpoints require auth?
+
+| Endpoint | Auth |
+| --- | --- |
+| `GET /api/public/health` | No |
+| `GET /api/public/challenges` | Optional |
+| `GET /api/public/challenges/{slug}` | Optional |
+| `GET /api/public/leaderboard` | No |
+| `GET /api/public/profiles/{userId}` | No |
+| `GET /api/public/me` | Yes |
+| `POST /api/public/challenges/{slug}/submit` | Yes |
+| `GET /api/public/challenges/{slug}/writeups` | Yes and challenge must be solved |

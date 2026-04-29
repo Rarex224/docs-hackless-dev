@@ -1,0 +1,51 @@
+---
+title: Introduction
+description: Developer documentation for the Hackless public API, TypeScript SDK, and Go MCP server.
+---
+
+Welcome to the Hackless developer docs.
+
+Hackless is a cybersecurity training and CTF platform with public challenge data, authenticated solve workflows, leaderboards, profiles, writeups, and an MCP bridge for LLM-assisted workflows. These docs cover the stable integration surfaces you can build against.
+
+## What is documented here
+
+- **Public REST API** for challenge discovery, leaderboard reads, profile reads, authenticated progress, writeups, and flag submission.
+- **OpenAPI specification** available as JSON and YAML for external tooling.
+- **TypeScript SDK** for applications that want a typed client instead of hand-written `fetch` calls.
+- **Go MCP server** for Claude and other MCP clients that should interact with Hackless through tools.
+
+## Platform architecture
+
+Hackless is built around a Next.js application backed by Prisma and PostgreSQL. The public REST API wraps the application’s server-side procedures and exposes only the integration-safe routes under `/api/public`.
+
+The MCP server and SDK both use those public REST endpoints. They do not depend on the internal tRPC router.
+
+## Start points
+
+| Area | Page |
+| --- | --- |
+| Public routes and schemas | [Public REST API](/docs/api) |
+| Typed JavaScript/TypeScript usage | [TypeScript SDK](/docs/sdk/typescript) |
+| Claude/MCP usage | [MCP Go Server](/docs/mcp/go-server) |
+| Hosting this docs site | [Railway Deployment](/docs/deploy/railway) |
+
+## Base URLs
+
+Production platform:
+
+```txt
+https://hackless.dev
+```
+
+Documentation site:
+
+```txt
+https://docs.hackless.dev
+```
+
+OpenAPI files:
+
+```txt
+https://docs.hackless.dev/openapi/openapi.json
+https://docs.hackless.dev/openapi/openapi.yaml
+```

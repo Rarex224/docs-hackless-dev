@@ -1,0 +1,546 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Hackless Public API",
+    "version": "1.0.0",
+    "description": "Public REST API for Hackless challenge, leaderboard, profile, writeup, and flag submission workflows."
+  },
+  "servers": [
+    {
+      "url": "https://hackless.dev",
+      "description": "Production"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    },
+    {
+      "apiKeyAuth": []
+    }
+  ],
+  "paths": {
+    "/api/public/health": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "Health check",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "API is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["ok"],
+                  "properties": {
+                    "ok": { "type": "boolean", "example": true }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/public/challenges": {
+      "get": {
+        "tags": ["Challenges"],
+        "summary": "List challenges",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Challenge summaries",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["challenges"],
+                  "properties": {
+                    "challenges": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/ChallengeSummary" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/api/public/challenges/{slug}": {
+      "get": {
+        "tags": ["Challenges"],
+        "summary": "Get challenge by slug",
+        "security": [],
+        "parameters": [
+          { "$ref": "#/components/parameters/Slug" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Challenge detail",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["challenge"],
+                  "properties": {
+                    "challenge": { "$ref": "#/components/schemas/ChallengeDetail" }
+                  }
+                }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/Error" },
+          "500": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/api/public/challenges/{slug}/submit": {
+      "post": {
+        "tags": ["Challenges"],
+        "summary": "Submit a flag",
+        "parameters": [
+          { "$ref": "#/components/parameters/Slug" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["flag"],
+                "properties": {
+                  "flag": { "type": "string", "minLength": 1, "example": "hackless{example_flag}" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Submission accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["result"],
+                  "properties": {
+                    "result": { "$ref": "#/components/schemas/SubmitFlagResult" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/Error" },
+          "401": { "$ref": "#/components/responses/Error" },
+          "404": { "$ref": "#/components/responses/Error" },
+          "409": { "$ref": "#/components/responses/Error" },
+          "500": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/api/public/challenges/{slug}/writeups": {
+      "get": {
+        "tags": ["Writeups"],
+        "summary": "List challenge writeups",
+        "parameters": [
+          { "$ref": "#/components/parameters/Slug" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Challenge writeups",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ChallengeWriteupsResponse" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Error" },
+          "403": { "$ref": "#/components/responses/Error" },
+          "404": { "$ref": "#/components/responses/Error" },
+          "500": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/api/public/leaderboard": {
+      "get": {
+        "tags": ["Leaderboard"],
+        "summary": "Get leaderboard",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Leaderboard entries",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["leaderboard"],
+                  "properties": {
+                    "leaderboard": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/LeaderboardEntry" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/api/public/me": {
+      "get": {
+        "tags": ["Profiles"],
+        "summary": "Get authenticated profile",
+        "responses": {
+          "200": {
+            "description": "Authenticated user profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["profile"],
+                  "properties": {
+                    "profile": { "$ref": "#/components/schemas/MyProfile" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Error" },
+          "500": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/api/public/profiles/{userId}": {
+      "get": {
+        "tags": ["Profiles"],
+        "summary": "Get public profile",
+        "security": [],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Public profile or null",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["profile"],
+                  "properties": {
+                    "profile": {
+                      "oneOf": [
+                        { "$ref": "#/components/schemas/PublicProfile" },
+                        { "type": "null" }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Hackless MCP/API key, for example Authorization: Bearer hk_..."
+      },
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      }
+    },
+    "parameters": {
+      "Slug": {
+        "name": "slug",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string" },
+        "example": "cryptovault"
+      }
+    },
+    "responses": {
+      "Error": {
+        "description": "Error response",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "required": ["error"],
+        "properties": {
+          "error": { "type": "string" }
+        }
+      },
+      "ChallengeDifficulty": {
+        "type": "string",
+        "enum": ["Easy", "Medium", "Hard", "Insane"]
+      },
+      "ChallengeSummary": {
+        "type": "object",
+        "required": ["id", "slug", "categories", "title", "description", "difficulty", "points", "hasInstance", "type", "attemptsCount", "createdAt", "solved", "solvesCount"],
+        "properties": {
+          "id": { "type": "string" },
+          "slug": { "type": "string" },
+          "categories": { "type": "array", "items": { "type": "string" } },
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "difficulty": { "$ref": "#/components/schemas/ChallengeDifficulty" },
+          "points": { "type": "integer" },
+          "fileUrl": { "type": ["string", "null"] },
+          "fileName": { "type": ["string", "null"] },
+          "hasInstance": { "type": "boolean" },
+          "dockerPort": { "type": ["integer", "null"] },
+          "type": { "type": "string", "example": "web" },
+          "attemptsCount": { "type": "integer" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "creator": { "$ref": "#/components/schemas/ChallengeCreator" },
+          "solved": { "type": "boolean" },
+          "solvesCount": { "type": "integer" },
+          "avgStars": { "type": ["number", "null"] }
+        }
+      },
+      "ChallengeDetail": {
+        "allOf": [
+          { "$ref": "#/components/schemas/ChallengeSummary" },
+          {
+            "type": "object",
+            "required": ["unlocked", "submittedFlag", "totalReviews"],
+            "properties": {
+              "unlocked": { "type": "boolean" },
+              "submittedFlag": { "type": ["string", "null"] },
+              "avgDifficulty": { "type": ["number", "null"] },
+              "totalReviews": { "type": "integer" },
+              "myReview": {
+                "oneOf": [
+                  { "$ref": "#/components/schemas/ChallengeReview" },
+                  { "type": "null" }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "ChallengeCreator": {
+        "type": ["object", "null"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": ["string", "null"] },
+          "username": { "type": ["string", "null"] }
+        }
+      },
+      "ChallengeReview": {
+        "type": "object",
+        "required": ["stars", "difficulty"],
+        "properties": {
+          "stars": { "type": "integer", "minimum": 1, "maximum": 5 },
+          "difficulty": { "type": "integer", "minimum": 1, "maximum": 10 }
+        }
+      },
+      "SubmitFlagResult": {
+        "type": "object",
+        "required": ["success", "points", "newBadges"],
+        "properties": {
+          "success": { "type": "boolean" },
+          "points": { "type": "integer" },
+          "newBadges": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/BadgeAward" }
+          }
+        }
+      },
+      "BadgeAward": {
+        "type": "object",
+        "required": ["id", "title", "icon", "image"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "icon": { "type": "string" },
+          "image": { "type": ["string", "null"] }
+        }
+      },
+      "LeaderboardEntry": {
+        "type": "object",
+        "required": ["id", "name", "totalPoints", "totalSolves", "solves"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "username": { "type": ["string", "null"] },
+          "image": { "type": ["string", "null"] },
+          "totalPoints": { "type": "integer" },
+          "totalSolves": { "type": "integer" },
+          "lastSolvedAt": { "type": ["string", "null"], "format": "date-time" },
+          "solves": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/LeaderboardSolve" }
+          }
+        }
+      },
+      "LeaderboardSolve": {
+        "type": "object",
+        "required": ["solvedAt", "points"],
+        "properties": {
+          "solvedAt": { "type": "string", "format": "date-time" },
+          "points": { "type": "integer" }
+        }
+      },
+      "PublicProfile": {
+        "type": "object",
+        "required": ["id", "name", "username", "image", "createdAt", "solvedChallenges", "createdChallenges", "badges"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": ["string", "null"] },
+          "username": { "type": ["string", "null"] },
+          "image": { "type": ["string", "null"] },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "solvedChallenges": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ProfileSolve" }
+          },
+          "createdChallenges": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ProfileChallenge" }
+          },
+          "badges": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ProfileBadge" }
+          },
+          "rank": { "type": "integer" },
+          "totalPoints": { "type": "integer" },
+          "firstBloodCount": { "type": "integer" },
+          "top3Count": { "type": "integer" },
+          "categoryCounts": {
+            "type": "object",
+            "additionalProperties": { "type": "integer" }
+          },
+          "difficultyCounts": {
+            "type": "object",
+            "additionalProperties": { "type": "integer" }
+          }
+        }
+      },
+      "MyProfile": {
+        "allOf": [
+          { "$ref": "#/components/schemas/PublicProfile" },
+          {
+            "type": "object",
+            "required": ["email", "twoFactorEnabled", "rank", "totalPoints", "firstBloodCount", "top3Count"],
+            "properties": {
+              "email": { "type": ["string", "null"], "format": "email" },
+              "twoFactorEnabled": { "type": "boolean" },
+              "mcpApiKeys": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/McpApiKey" }
+              }
+            }
+          }
+        ]
+      },
+      "ProfileSolve": {
+        "type": "object",
+        "required": ["solvedAt", "challenge"],
+        "properties": {
+          "solvedAt": { "type": "string", "format": "date-time" },
+          "challenge": { "$ref": "#/components/schemas/ProfileChallenge" }
+        }
+      },
+      "ProfileChallenge": {
+        "type": "object",
+        "required": ["id", "title", "points", "categories", "difficulty"],
+        "properties": {
+          "id": { "type": "string" },
+          "slug": { "type": "string" },
+          "title": { "type": "string" },
+          "points": { "type": "integer" },
+          "categories": { "type": "array", "items": { "type": "string" } },
+          "difficulty": { "$ref": "#/components/schemas/ChallengeDifficulty" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "ProfileBadge": {
+        "type": "object",
+        "required": ["badgeId", "awardedAt"],
+        "properties": {
+          "badgeId": { "type": "string" },
+          "awardedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "McpApiKey": {
+        "type": "object",
+        "required": ["id", "name", "keyPrefix", "createdAt"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "keyPrefix": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "lastUsedAt": { "type": ["string", "null"], "format": "date-time" },
+          "revokedAt": { "type": ["string", "null"], "format": "date-time" }
+        }
+      },
+      "ChallengeWriteupsResponse": {
+        "type": "object",
+        "required": ["challenge", "writeups"],
+        "properties": {
+          "challenge": {
+            "type": "object",
+            "required": ["id", "title", "categories", "difficulty", "points"],
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "type": "string" },
+              "categories": { "type": "array", "items": { "type": "string" } },
+              "difficulty": { "$ref": "#/components/schemas/ChallengeDifficulty" },
+              "points": { "type": "integer" }
+            }
+          },
+          "writeups": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Writeup" }
+          }
+        }
+      },
+      "Writeup": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "userId": { "type": "string" },
+          "challengeId": { "type": "string" },
+          "title": { "type": "string" },
+          "content": { "type": "string" },
+          "images": { "type": "array", "items": { "type": "string" } },
+          "status": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" },
+          "user": {
+            "type": "object",
+            "properties": {
+              "username": { "type": ["string", "null"] },
+              "name": { "type": ["string", "null"] }
+            }
+          }
+        }
+      }
+    }
+  }
+}

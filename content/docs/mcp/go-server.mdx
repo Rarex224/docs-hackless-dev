@@ -1,0 +1,88 @@
+---
+title: MCP Go Server
+description: Install and configure the Hackless Go MCP server for Claude and other MCP clients.
+---
+
+The Hackless MCP server is a Go binary that exposes Hackless public API actions as MCP tools. It is designed for local stdio usage with Claude, while talking to the production Hackless API.
+
+## Tools
+
+The current server exposes:
+
+- `list_challenges`
+- `get_my_progress`
+- `view_leaderboard`
+- `submit_flag`
+
+These map to Hackless public API routes instead of internal application routers.
+
+## Environment variables
+
+| Variable | Purpose |
+| --- | --- |
+| `HACKLESS_BASE_URL` | API base URL. Defaults to `https://hackless.dev` |
+| `HACKLESS_API_KEY` | Preferred API-key authentication for MCP usage |
+| `HACKLESS_COOKIE` | Optional session cookie for authenticated tools |
+| `ADDR` | HTTP smoke-test listen address. Defaults to `:8000` |
+
+## Install with Go
+
+```bash
+go install github.com/Rarex224/hackless-mcp-platform/hackless-mcp-go@latest
+```
+
+Make sure your Go bin directory is in `PATH`.
+
+## Build from source
+
+```bash
+git clone https://github.com/Rarex224/hackless-mcp-platform.git
+cd hackless-mcp-platform/hackless-mcp-go
+go build -o hackless-mcp
+```
+
+## Register with Claude
+
+```bash
+claude mcp add hackless -- /absolute/path/to/hackless-mcp
+```
+
+With explicit production configuration:
+
+```bash
+HACKLESS_BASE_URL=https://hackless.dev \
+HACKLESS_API_KEY=hk_your_api_key \
+/absolute/path/to/hackless-mcp
+```
+
+## Claude Desktop JSON
+
+```json
+{
+  "mcpServers": {
+    "hackless": {
+      "command": "/absolute/path/to/hackless-mcp",
+      "env": {
+        "HACKLESS_BASE_URL": "https://hackless.dev",
+        "HACKLESS_API_KEY": "hk_your_api_key"
+      }
+    }
+  }
+}
+```
+
+## HTTP smoke mode
+
+For manual smoke tests:
+
+```bash
+go run . --http
+```
+
+This is mainly useful when validating the binary or a hosted service. Claude Desktop and Claude Code typically use local stdio MCP.
+
+## Authentication model
+
+For normal MCP usage, create a Hackless MCP API key and pass it as `HACKLESS_API_KEY`. The server sends it to Hackless with API-key authentication, and Hackless resolves it into the owning user session.
+
+Use `HACKLESS_COOKIE` only when you intentionally want the MCP server to reuse a browser session cookie.

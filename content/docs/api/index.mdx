@@ -1,0 +1,120 @@
+---
+title: Public REST API
+description: OpenAPI-backed documentation for Hackless routes under /api/public.
+---
+
+The Hackless Public REST API exposes integration-safe platform data and authenticated user actions under:
+
+```txt
+https://hackless.dev/api/public
+```
+
+The full OpenAPI specification is available here:
+
+- [OpenAPI JSON](/openapi/openapi.json)
+- [OpenAPI YAML](/openapi/openapi.yaml)
+
+## Authentication
+
+Read-only public endpoints such as health, challenges, leaderboard, and public profiles can be called without authentication.
+
+Authenticated endpoints accept either:
+
+```http
+Authorization: Bearer hk_your_api_key
+```
+
+or:
+
+```http
+X-API-Key: hk_your_api_key
+```
+
+The same request context can also resolve a logged-in Hackless session cookie when called from the web app.
+
+## Endpoints
+
+### Health
+
+`GET /api/public/health`
+
+Returns `{ "ok": true }`. Use this for uptime checks and smoke tests.
+
+### Challenges
+
+`GET /api/public/challenges`
+
+Lists public challenge summaries. Each item includes metadata such as slug, categories, difficulty, points, solve state, solve count, and review average.
+
+`GET /api/public/challenges/{slug}`
+
+Returns a challenge detail object. If authenticated, the response includes user-specific state such as `solved`, `unlocked`, `submittedFlag`, and `myReview`.
+
+### Flag submission
+
+`POST /api/public/challenges/{slug}/submit`
+
+Submits a flag for the authenticated user.
+
+```json
+{
+  "flag": "hackless{example_flag}"
+}
+```
+
+Successful responses include:
+
+```json
+{
+  "result": {
+    "success": true,
+    "points": 100,
+    "newBadges": []
+  }
+}
+```
+
+### Challenge writeups
+
+`GET /api/public/challenges/{slug}/writeups`
+
+Returns approved writeups for a challenge and the authenticated user’s own writeup if present. The user must have solved the challenge first.
+
+### Leaderboard
+
+`GET /api/public/leaderboard`
+
+Returns users sorted by total points, with solve count and solve timeline data.
+
+### Current user profile
+
+`GET /api/public/me`
+
+Returns the authenticated user’s profile, solved challenges, created challenges, badges, rank, total points, first-blood count, top-3 count, and MCP API key metadata.
+
+### Public profile
+
+`GET /api/public/profiles/{userId}`
+
+Returns a public user profile without exposing email.
+
+## Error format
+
+Errors are returned as JSON:
+
+```json
+{
+  "error": "Unauthorized"
+}
+```
+
+Common status codes:
+
+| Status | Meaning |
+| --- | --- |
+| `400` | Invalid request body or bad flag |
+| `401` | Missing or invalid authentication |
+| `403` | Authenticated but not allowed |
+| `404` | Resource not found |
+| `409` | Conflict, for example already solved |
+| `500` | Unexpected server error |

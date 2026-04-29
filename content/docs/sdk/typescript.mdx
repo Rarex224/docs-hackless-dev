@@ -1,0 +1,128 @@
+---
+title: TypeScript SDK
+description: Use hackless-sdk to call the Hackless public API from TypeScript.
+---
+
+`hackless-sdk` is a small TypeScript client for the Hackless Public REST API. It mirrors the routes under `/api/public` and exports typed response models.
+
+## Installation
+
+```bash
+npm install hackless-sdk
+```
+
+You can also install it with pnpm or yarn.
+
+## Create a client
+
+```ts
+import { createHacklessClient } from "hackless-sdk";
+
+const client = createHacklessClient({
+  baseURL: "https://hackless.dev",
+  apiKey: process.env.HACKLESS_API_KEY,
+  timeout: 10000,
+});
+```
+
+`apiKey` is optional for public reads and required for authenticated methods like `getMyProgress()` and `submitFlag()`.
+
+## Challenges
+
+```ts
+const challenges = await client.listChallenges();
+const cryptovault = await client.getChallenge("cryptovault");
+```
+
+`listChallenges()` returns challenge summaries. `getChallenge(slug)` returns detail data and includes user-specific state when the client is authenticated.
+
+## Leaderboard
+
+```ts
+const leaderboard = await client.getLeaderboard();
+
+for (const row of leaderboard) {
+  console.log(row.username, row.totalPoints, row.totalSolves);
+}
+```
+
+## Profiles
+
+```ts
+const me = await client.getMyProgress();
+const profile = await client.getPublicProfile("user_id_here");
+```
+
+`getMyProgress()` requires authentication. Public profiles do not expose email addresses.
+
+## Submit a flag
+
+```ts
+const result = await client.submitFlag(
+  "cryptovault",
+  "hackless{example_flag}",
+);
+
+console.log(result.success, result.points, result.newBadges);
+```
+
+## Health check
+
+```ts
+const health = await client.health();
+console.log(health.ok);
+```
+
+## Runtime configuration
+
+```ts
+client.setApiKey("hk_new_key");
+client.removeApiKey();
+client.setTimeout(15000);
+```
+
+You can also inject a custom fetch implementation:
+
+```ts
+const client = createHacklessClient({
+  baseURL: "https://hackless.dev",
+  fetchImpl: fetch,
+  headers: async () => ({
+    "X-Request-Source": "my-integration",
+  }),
+});
+```
+
+## Errors
+
+Failed API responses throw `HacklessApiError`.
+
+```ts
+import { HacklessApiError } from "hackless-sdk";
+
+try {
+  await client.getChallenge("missing-challenge");
+} catch (error) {
+  if (error instanceof HacklessApiError && error.status === 404) {
+    console.log("Challenge not found");
+  }
+}
+```
+
+## Exported types
+
+The SDK exports the main response models:
+
+- `ChallengeSummary`
+- `ChallengeDetail`
+- `LeaderboardEntry`
+- `PublicProfile`
+- `MyProfile`
+- `SubmitFlagResult`
+- `ChallengeDifficulty`
+- `HacklessClientOptions`
+- `HacklessApiError`
+
+## Design intent
+
+The SDK is intentionally thin. It does not reimplement Hackless business logic; it gives developers a typed, ergonomic wrapper around the public REST API.
